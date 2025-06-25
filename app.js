@@ -1,10 +1,7 @@
 const cors = require('cors');
 const path = require('path');
 const express = require('express');
-const authRoutes = require('./src/routes/authentication.routes');
-const userRoutes = require('./src/routes/user.routes');
-const kriptoRoutes = require('./src/routes/kripto.routes');
-const swaggerRoutes = require('./src/routes/swagger.routes');
+const authRoutes = require('./src/routes/auth.routes');
 
 require('dotenv').config();
 
@@ -17,11 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(
   cors({
-    origin: [
-      'http://localhost:3000',
-      'http://192.168.0.109:3000',
-      'https://ramalkriptoid.netlify.app',
-    ],
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: [
       'Origin',
@@ -42,15 +35,10 @@ app.use((req, res, next) => {
 
 // For testing only
 app.get('/', (_req, res) => {
-  res.send('Ramal Kripto API');
+  res.send('Litera API is running!');
 });
 
 // Call routes
 app.use('/auth', authRoutes);
-app.use('/user', userRoutes);
-app.use('/kripto', kriptoRoutes);
-
-// Swagger
-app.use(swaggerRoutes);
 
 module.exports = app;
