@@ -19,14 +19,14 @@ exports.signup = async (req, res) => {
     const hashedPassword = await argon2.hash(password);
 
     // Create data
-    const createdUser = await User.create({
+    const data = await User.create({
       name,
       username,
       email,
       password: hashedPassword,
     });
 
-    return res.status(201).json({ createdUser });
+    return res.status(201).json({ data });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
