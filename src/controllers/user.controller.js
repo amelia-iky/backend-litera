@@ -10,21 +10,45 @@ exports.getProfile = async (req, res) => {
     }
 
     res.status(200).json({ data: user });
-  } catch (err) {
-    res.status(500).json({ message: 'Internal Server Error', err });
+  } catch (error) {
+    res.status(500).json({ message: error });
   }
 };
 
 // Update profile
 exports.updateProfile = async (req, res) => {
-  const { name, email } = req.body || {};
+  const { name, username, email } = req.body || {};
 
   try {
+    // Check user exists
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    // Update name & email if provided
+    // Check username already exists
+    if (username) {
+      const existingUser = await User.findOne({
+        username,
+        _id: { $ne: user._id },
+      });
+      if (existingUser) {
+        return res.status(400).json({ message: 'Username already exists' });
+      }
+    }
+
+    // Check email already exists
+    if (email) {
+      const existingEmailUser = await User.findOne({
+        email,
+        _id: { $ne: user._id },
+      });
+      if (existingEmailUser) {
+        return res.status(400).json({ message: 'Email already exists' });
+      }
+    }
+
+    // Update data if provided
     if (name) user.name = name;
+    if (username) user.username = username;
     if (email) user.email = email;
 
     // Update in cloudinary
@@ -41,7 +65,7 @@ exports.updateProfile = async (req, res) => {
         }
       }
 
-      // Save new images
+      // Save images
       user.profileImages = req.files.profileImages.map((file) => ({
         url: file.path,
         filename: file.filename,
@@ -50,13 +74,9 @@ exports.updateProfile = async (req, res) => {
     }
 
     await user.save();
-
-    res.status(200).json({
-      message: 'Profile updated successfully',
-      data: user,
-    });
-  } catch (err) {
-    res.status(500).json({ message: 'Internal Server Error', err });
+    res.status(200).json({ user });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -78,12 +98,8 @@ exports.deletePhotoProfile = async (req, res) => {
 
     user.profileImages = profileImages;
     await user.save();
-
-    res.status(200).json({
-      message: 'Profile image deleted successfully',
-      data: user,
-    });
-  } catch (err) {
-    res.status(500).json({ message: 'Internal Server Error', err });
+    res.status(200).json({ user });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
