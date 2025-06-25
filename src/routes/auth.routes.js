@@ -27,4 +27,7 @@ router.get('/keep-login', authentication(), async (req, res) => {
   }
 });
 
+// Signout
+router.post('/keluar', authentication(), auth.signout);
+
 module.exports = router;
