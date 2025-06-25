@@ -1,7 +1,6 @@
 const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user.model');
-
 require('dotenv').config();
 
 // Signup
@@ -27,9 +26,7 @@ exports.signup = async (req, res) => {
       password: hashedPassword,
     });
 
-    return res.status(200).json({
-      user: createdUser,
-    });
+    return res.status(201).json({ createdUser });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -69,4 +66,17 @@ exports.signin = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+};
+
+// Logout
+exports.signout = (req, res) => {
+  const token = req.header('Authorization')?.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ message: 'Unauthorized!' });
+  }
+
+  const { blacklist } = require('../middleware/authentication.middleware');
+  blacklist.push(token);
+
+  return res.status(200).json({ message: 'Logged out successfully' });
 };
