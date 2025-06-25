@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const user = require('../controllers/user.controller');
-const { authentication } = require('../middleware/authentication.middleware');
+const { authentication } = require('../middleware/auth.middleware');
 const { upload } = require('../configs/cloudinary.config');
 
 // Get profile
