@@ -3,7 +3,6 @@ const path = require('path');
 const express = require('express');
 const authRoutes = require('./src/routes/auth.routes');
 const userRoutes = require('./src/routes/user.routes');
-
 require('dotenv').config();
 
 // Create app
