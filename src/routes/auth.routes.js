@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const auth = require('../controllers/auth.controller');
-const { auth } = require('../middleware/auth.middleware');
+const { authentication } = require('../middleware/authentication.middleware');
 const User = require('../models/user.model');
 
 // Signup
@@ -14,7 +14,7 @@ router.post('/signin', (req, res) => {
 });
 
 // Keep Login
-router.get('/keep-login', auth(), async (req, res) => {
+router.get('/keep-login', authentication(), async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
     if (!user) {
