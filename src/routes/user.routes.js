@@ -4,9 +4,7 @@ const { authentication } = require('../middleware/authentication.middleware');
 const { upload } = require('../configs/cloudinary.config');
 
 // Get profile
-router.get('/profile', authentication(), (req, res) => {
-  user.getProfile(req, res);
-});
+router.get('/profile', authentication(), user.getProfile);
 
 // Update profile
 router.put(
