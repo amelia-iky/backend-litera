@@ -1,18 +1,47 @@
 const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');
+const validator = require('validator');
 const User = require('../models/user.model');
+const { blacklist } = require('../middleware/authentication.middleware');
 require('dotenv').config();
 
 // Signup
 exports.signup = async (req, res) => {
   const { name, username, email, password } = req.body;
+
   try {
-    // Check if email already exists
-    const user = await User.findOne({ username, email });
+    // Input validation
+    if (!name || !username || !email || !password) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    // Email validation
+    if (!validator.isEmail(email)) {
+      return res.status(400).json({ message: 'Invalid email format' });
+    }
+
+    // Password validation
+    const isPasswordValid =
+      password.length >= 6 &&
+      /[A-Za-z]/.test(password) &&
+      /[0-9]/.test(password);
+
+    if (!isPasswordValid) {
+      return res.status(400).json({
+        message:
+          'Password must be at least 6 characters and contain letters and numbers',
+      });
+    }
+
+    // Check data user
+    const user = await User.findOne({
+      $or: [{ username }, { email }],
+    });
+
     if (user) {
       return res
         .status(400)
-        .json({ message: 'Username orEmail already exists' });
+        .json({ message: 'Username or email already exists' });
     }
 
     // Hash password
@@ -35,6 +64,7 @@ exports.signup = async (req, res) => {
 // Signin
 exports.signin = async (req, res) => {
   const { username, password } = req.body;
+
   try {
     // Check if username exists
     const user = await User.findOne({ username });
@@ -68,15 +98,45 @@ exports.signin = async (req, res) => {
   }
 };
 
-// Logout
-exports.signout = (req, res) => {
-  const token = req.header('Authorization')?.split(' ')[1];
-  if (!token) {
-    return res.status(401).json({ message: 'Unauthorized!' });
+// Keep Login
+exports.keepLogin = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found!' });
+    }
+
+    // Create new token
+    const token = jwt.sign(
+      {
+        id: user._id,
+        name: user.name,
+        username: user.username,
+        email: user.email,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+
+    return res.header(`Authorization`, `Bearer ${token}`).status(200).json({
+      token: token,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
+};
 
-  const { blacklist } = require('../middleware/authentication.middleware');
-  blacklist.push(token);
+// Signout
+exports.signout = (req, res) => {
+  try {
+    const token = req.header('Authorization')?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: 'Unauthorized!' });
+    }
 
-  return res.status(200).json({ message: 'Logged out successfully' });
+    blacklist.push(token);
+    return res.status(200).json({ message: 'Signout successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
