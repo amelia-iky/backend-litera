@@ -129,7 +129,12 @@ exports.keepLogin = async (req, res) => {
 // Signout
 exports.signout = (req, res) => {
   try {
-    const token = req.header('Authorization')?.split(' ')[1];
+    const authHeader = req.get('Authorization');
+    const token =
+      authHeader && authHeader.startsWith('Bearer ')
+        ? authHeader.split(' ')[1]
+        : null;
+
     if (!token) {
       return res.status(401).json({ message: 'Unauthorized!' });
     }
