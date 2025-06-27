@@ -4,30 +4,15 @@ const { authentication } = require('../middleware/authentication.middleware');
 const User = require('../models/user.model');
 
 // Signup
-router.post('/signup', (req, res) => {
-  auth.signup(req, res);
-});
+router.post('/signup', auth.signup);
 
 // Signin
-router.post('/signin', (req, res) => {
-  auth.signin(req, res);
-});
+router.post('/signin', auth.signin);
 
 // Keep Login
-router.get('/keep-login', authentication(), async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select('-password');
-    if (!user) {
-      return res.status(404).json({ message: 'User not found!' });
-    }
-
-    res.status(200).json({ user });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
+router.get('/keep-login', authentication(), auth.keepLogin);
 
 // Signout
-router.post('/keluar', authentication(), auth.signout);
+router.post('/signout', authentication(), auth.signout);
 
 module.exports = router;
