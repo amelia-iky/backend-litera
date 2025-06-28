@@ -1,4 +1,4 @@
-const Favorite = require('../models/bookFavorite.model');
+const BookFavorite = require('../models/bookFavorite.model');
 
 // Add favorite
 exports.addFavorite = async (req, res) => {
@@ -9,12 +9,12 @@ exports.addFavorite = async (req, res) => {
       return res.status(400).json({ message: 'bookId and title are required' });
     }
 
-    const existing = await Favorite.findOne({ user: req.user.id, bookId });
+    const existing = await BookFavorite.findOne({ user: req.user.id, bookId });
     if (existing) {
       return res.status(400).json({ message: 'Book already in favorites' });
     }
 
-    const favorite = new Favorite({
+    const favorite = new BookFavorite({
       user: req.user.id,
       bookId,
       title,
@@ -33,7 +33,7 @@ exports.addFavorite = async (req, res) => {
 // Get favorites
 exports.getFavorites = async (req, res) => {
   try {
-    const favorites = await Favorite.find({ user: req.user.id })
+    const favorites = await BookFavorite.find({ user: req.user.id })
       .sort({ createdAt: -1 })
       .populate('user');
 
@@ -52,9 +52,9 @@ exports.deleteFavorite = async (req, res) => {
       return res.status(400).json({ message: 'id is required' });
     }
 
-    const favorite = await Favorite.findByIdAndDelete(id);
+    const favorite = await BookFavorite.findByIdAndDelete(id);
     if (!favorite) {
-      return res.status(404).json({ message: 'Favorite not found' });
+      return res.status(404).json({ message: 'BookFavorite not found' });
     }
 
     res.status(200).json({ favorite });
