@@ -1,5 +1,6 @@
 const Favorite = require('../models/bookFavorite.model');
 
+// Add favorite
 exports.addFavorite = async (req, res) => {
   const { bookId, title, author, coverImage } = req.body;
 
@@ -28,12 +29,34 @@ exports.addFavorite = async (req, res) => {
   }
 };
 
+// Get favorites
 exports.getFavorites = async (req, res) => {
   try {
     const favorites = await Favorite.find({ user: req.user.id }).populate(
       'user'
     );
+
     res.status(200).json({ favorites });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Delete favorite
+exports.deleteFavorite = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    if (!id) {
+      return res.status(400).json({ message: 'id is required' });
+    }
+
+    const favorite = await Favorite.findByIdAndDelete(id);
+    if (!favorite) {
+      return res.status(404).json({ message: 'Favorite not found' });
+    }
+
+    res.status(200).json({ favorite });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
