@@ -19,7 +19,7 @@ exports.addFavorite = async (req, res) => {
       bookId,
       title,
       author,
-      tags,
+      tags: tags || [],
       coverImage,
     });
 
