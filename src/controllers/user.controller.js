@@ -1,5 +1,6 @@
-const User = require('../models/user.model');
+const argon2 = require('argon2');
 const cloudinary = require('cloudinary').v2;
+const User = require('../models/user.model');
 
 // Get profile
 exports.getProfile = async (req, res) => {
@@ -17,7 +18,7 @@ exports.getProfile = async (req, res) => {
 
 // Update profile
 exports.updateProfile = async (req, res) => {
-  const { name, username, email } = req.body || {};
+  const { name, username, email, password, oldPassword } = req.body || {};
 
   try {
     // Check user exists
@@ -46,10 +47,35 @@ exports.updateProfile = async (req, res) => {
       }
     }
 
+    // Check password
+    if (password) {
+      if (!oldPassword) {
+        return res.status(400).json({ message: 'Old password required' });
+      }
+
+      const isMatch = await argon2.verify(user.password, oldPassword);
+      if (!isMatch) {
+        return res.status(401).json({ message: 'Old password is incorrect' });
+      }
+
+      const isPasswordValid =
+        password.length >= 6 &&
+        /[A-Za-z]/.test(password) &&
+        /[0-9]/.test(password);
+
+      if (!isPasswordValid) {
+        return res.status(400).json({
+          message:
+            'New password must be at least 6 characters and contain letters and numbers',
+        });
+      }
+    }
+
     // Update data if provided
     if (name) user.name = name;
     if (username) user.username = username;
     if (email) user.email = email;
+    if (password) user.password = await argon2.hash(password);
 
     // Update in cloudinary
     if (req.files?.profileImages) {
