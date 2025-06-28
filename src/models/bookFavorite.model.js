@@ -6,6 +6,7 @@ const favoriteSchema = new mongoose.Schema(
     bookId: { type: String, required: true },
     title: String,
     author: String,
+    tags: [String],
     coverImage: String,
   },
   { timestamps: true }
