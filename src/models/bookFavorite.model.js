@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const favoriteSchema = new mongoose.Schema(
+const bookFavoriteSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     bookId: { type: String, required: true },
@@ -12,9 +12,9 @@ const favoriteSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-favoriteSchema.method('toJSON', function () {
+bookFavoriteSchema.method('toJSON', function () {
   const { __v, _id, ...object } = this.toObject();
   return { id: _id, ...object };
 });
 
-module.exports = mongoose.model('Favorite', favoriteSchema);
+module.exports = mongoose.model('BookFavorite', bookFavoriteSchema);
