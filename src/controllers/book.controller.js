@@ -2,7 +2,7 @@ const Favorite = require('../models/bookFavorite.model');
 
 // Add favorite
 exports.addFavorite = async (req, res) => {
-  const { bookId, title, author, coverImage } = req.body;
+  const { bookId, title, author, tags, coverImage } = req.body;
 
   try {
     if (!bookId || !title) {
@@ -19,6 +19,7 @@ exports.addFavorite = async (req, res) => {
       bookId,
       title,
       author,
+      tags,
       coverImage,
     });
 
